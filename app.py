@@ -18,7 +18,7 @@ import shutil
 # ================================
 # STREAMLIT UI
 # ================================
-st.set_page_config(page_title='VisionAid AI',page_icon='ai.png', layout='wide')
+st.set_page_config(page_title='VisionAid AI',page_icon='icon.png', layout='wide')
 st.markdown('''<style>
 .stApp{background:linear-gradient(180deg,#050b18,#02060f);color:white;}
 .block-container{max-width:760px;padding-top:2rem;}
