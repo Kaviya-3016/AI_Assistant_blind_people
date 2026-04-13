@@ -2,7 +2,7 @@ import streamlit as st
 from ultralytics import YOLO
 import cv2
 import matplotlib.pyplot as plt
-from transformers import AutoProcessor, BlipForConditionalGeneration
+from transformers import AutoProcessor, BlipForConditionalGeneration, ImageFile
 from PIL import Image
 from PIL import Image, UnidentifiedImageError
 import pytesseract
@@ -46,7 +46,7 @@ input_type = st.radio('Input Type', ['Upload Image', 'Live Camera'])
 
 image = None
 image_path = None
-
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 # -------------------------------
 # INPUT HANDLING
 # -------------------------------
@@ -58,6 +58,10 @@ if input_type == 'Upload Image':
 
     if uploaded_file is not None:
         try:
+            uploaded_file.seek(0)
+            image = Image.open(uploaded_file)
+            image.verify()
+
             uploaded_file.seek(0)
             image = Image.open(uploaded_file).convert("RGB")
 
