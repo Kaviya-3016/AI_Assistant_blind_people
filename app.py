@@ -1,12 +1,12 @@
 import streamlit as st
 from ultralytics import YOLO
 import cv2
-import matplotlib.pyplot as plt
+
 from transformers import AutoProcessor, BlipForConditionalGeneration
 from PIL import Image, UnidentifiedImageError, ImageFile
 import pytesseract
 import re
-import numpy as np
+
 import tempfile
 import os
 from gtts import gTTS
@@ -39,62 +39,23 @@ else:
 CONF_THRESHOLD = 50 
 
 
-language = st.selectbox('Select Language', ['English', 'Tamil'])
-mode = st.selectbox('Mode Selection', ['Scene Description', 'Silent Mode'])
-input_type = st.radio('Input Type', ['Upload Image', 'Live Camera'])
 
-image = None
-image_path = None
-#ImageFile.LOAD_TRUNCATED_IMAGES = True
-# -------------------------------
-# INPUT HANDLING
-# -------------------------------
-if input_type == 'Upload Image':
-    uploaded_file = st.file_uploader(
-        'Upload an image',
-        type=['jpg', 'jpeg', 'png', 'webp']
-    )
+language = st.selectbox('Select Language',['English','Tamil'])
+mode = st.selectbox('Mode Selection',['Scene Description','Silent Mode'])
+input_type = st.radio('Input Type',['Upload Image','Live Camera'])
+uploaded_file = st.file_uploader('Upload an image', type=['jpg', 'jpeg', 'png'])if input_type == 'Upload Image' else st.camera_input('Live Camera')
+#custom_model_path = st.text_input('Custom YOLO model path', 'runs/detect/last_trained/train3/weights/best.pt')
+#pretrained_model_path = st.text_input('Pretrained YOLO model path', 'yolov8n.pt')
 
-    if uploaded_file is not None:
-        try:
-            #uploaded_file.seek(0)
-            #image = Image.open(uploaded_file)
-            #image.verify()
+if uploaded_file is not None:
+    image = Image.open(uploaded_file).convert("RGB")
+    tfile = tempfile.NamedTemporaryFile(delete=False, suffix='.jpg')
+    image.save(tfile.name)
+    tfile.write(uploaded_file.read())
+    image_path = tfile.name
 
-            uploaded_file.seek(0)
-            image = Image.open(uploaded_file).convert("RGB")
+    st.image(image, caption='Uploaded Image', use_container_width=True)
 
-            tfile = tempfile.NamedTemporaryFile(delete=False, suffix=".jpg")
-            image.save(tfile.name)
-            image_path = tfile.name
-
-            st.image(image, caption='Uploaded Image', use_container_width=True)
-
-        except Exception:
-            st.warning("The selected file is not a valid image. Please choose another file.")
-            st.stop()
-
-else:
-    camera_file = st.camera_input("Take a photo")
-
-    if camera_file is not None:
-        try:
-            camera_file.seek(0)
-            image = Image.open(camera_file).convert("RGB")
-
-            tfile = tempfile.NamedTemporaryFile(delete=False, suffix=".jpg")
-            image.save(tfile.name)
-            image_path = tfile.name
-
-            st.image(image, caption='Captured Image', use_container_width=True)
-
-        except Exception as e:
-            st.error(f"Could not read camera image: {e}")
-
-# -------------------------------
-# PROCESS ONLY IF IMAGE EXISTS
-# -------------------------------
-if image is not None:
     # -------------------------------
     # ADD-ON: TEXT vs IMAGE DETECTION
     # -------------------------------
