@@ -2,7 +2,7 @@ import streamlit as st
 from ultralytics import YOLO
 import cv2
 import matplotlib.pyplot as plt
-from transformers import BlipProcessor, BlipForConditionalGeneration
+from transformers import AutoProcessor, BlipForConditionalGeneration
 from PIL import Image
 from PIL import Image, UnidentifiedImageError
 import pytesseract
@@ -208,7 +208,7 @@ if image is not None:
         img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         st.image(img_rgb, caption='YOLO Detection + BLIP Ready Image', use_container_width=True)
 
-        processor = BlipProcessor.from_pretrained('Salesforce/blip-image-captioning-base')
+        processor = AutoProcessor.from_pretrained('Salesforce/blip-image-captioning-base')
         blip_model = BlipForConditionalGeneration.from_pretrained('Salesforce/blip-image-captioning-base')
 
         pil_image = Image.fromarray(img_rgb)
