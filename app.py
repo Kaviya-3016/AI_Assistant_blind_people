@@ -165,7 +165,7 @@ if image is not None:
     # ============== YOLO + BLIP PIPELINE (UNCHANGED) =============
     # ============================================================
     if not IS_TEXT_IMAGE:
-        custom_model = YOLO(r"D:/Final_Year_Project/best.pt")
+        custom_model = YOLO("best.pt")
         #custom_model = YOLO(r"D:/Final_Year_Project/trained_model/runs/detect/train3/weights/best.pt")
         #D:\Final_Year_Project\trained_model\runs\detect\train3\weights\best.pt
         #D:\Final_Year_Project\best.pt
