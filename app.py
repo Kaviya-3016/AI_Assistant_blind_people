@@ -57,9 +57,9 @@ if input_type == 'Upload Image':
 
     if uploaded_file is not None:
         try:
-            uploaded_file.seek(0)
-            image = Image.open(uploaded_file)
-            image.verify()
+            #uploaded_file.seek(0)
+            #image = Image.open(uploaded_file)
+            #image.verify()
 
             uploaded_file.seek(0)
             image = Image.open(uploaded_file).convert("RGB")
@@ -69,9 +69,6 @@ if input_type == 'Upload Image':
             image_path = tfile.name
 
             st.image(image, caption='Uploaded Image', use_container_width=True)
-
-        except UnidentifiedImageError:
-            st.error("Invalid image file. Please upload JPG, PNG, or WEBP.")
 
         except Exception as e:
             st.error(f"Error loading image: {e}")
