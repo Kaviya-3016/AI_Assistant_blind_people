@@ -1,0 +1,12 @@
+streamlit
+ultralytics
+opencv-python-headless
+matplotlib
+transformers
+torch
+Pillow
+pytesseract
+numpy
+gTTS
+deep-translator
+sentencepiece
