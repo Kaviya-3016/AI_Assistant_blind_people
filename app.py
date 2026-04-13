@@ -45,7 +45,7 @@ input_type = st.radio('Input Type', ['Upload Image', 'Live Camera'])
 
 image = None
 image_path = None
-ImageFile.LOAD_TRUNCATED_IMAGES = True
+#ImageFile.LOAD_TRUNCATED_IMAGES = True
 # -------------------------------
 # INPUT HANDLING
 # -------------------------------
@@ -70,8 +70,9 @@ if input_type == 'Upload Image':
 
             st.image(image, caption='Uploaded Image', use_container_width=True)
 
-        except Exception as e:
-            st.error(f"Error loading image: {e}")
+        except Exception:
+            st.warning("The selected file is not a valid image. Please choose another file.")
+            st.stop()
 
 else:
     camera_file = st.camera_input("Take a photo")
