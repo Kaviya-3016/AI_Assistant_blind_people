@@ -2,9 +2,8 @@ import streamlit as st
 from ultralytics import YOLO
 import cv2
 import matplotlib.pyplot as plt
-from transformers import AutoProcessor, BlipForConditionalGeneration, ImageFile
-from PIL import Image
-from PIL import Image, UnidentifiedImageError
+from transformers import AutoProcessor, BlipForConditionalGeneration
+from PIL import Image, UnidentifiedImageError, ImageFile
 import pytesseract
 import re
 import numpy as np
