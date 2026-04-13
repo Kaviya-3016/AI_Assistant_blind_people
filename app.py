@@ -1,7 +1,7 @@
 import streamlit as st
 from ultralytics import YOLO
 import cv2
-
+import numpy as np
 from transformers import AutoProcessor, BlipForConditionalGeneration
 from PIL import Image, UnidentifiedImageError, ImageFile
 import pytesseract
@@ -43,7 +43,7 @@ CONF_THRESHOLD = 50
 language = st.selectbox('Select Language',['English','Tamil'])
 mode = st.selectbox('Mode Selection',['Scene Description','Silent Mode'])
 input_type = st.radio('Input Type',['Upload Image','Live Camera'])
-uploaded_file = st.file_uploader('Upload an image', type=['jpg', 'jpeg', 'png'])
+#uploaded_file = st.file_uploader('Upload an image', type=['jpg', 'jpeg', 'png'])
 if input_type == "Upload Image":
     uploaded_file = st.file_uploader(
         "Upload an image",
