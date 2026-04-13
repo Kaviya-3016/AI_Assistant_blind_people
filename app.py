@@ -43,18 +43,47 @@ CONF_THRESHOLD = 50
 language = st.selectbox('Select Language',['English','Tamil'])
 mode = st.selectbox('Mode Selection',['Scene Description','Silent Mode'])
 input_type = st.radio('Input Type',['Upload Image','Live Camera'])
-uploaded_file = st.file_uploader('Upload an image', type=['jpg', 'jpeg', 'png'])if input_type == 'Upload Image' else st.camera_input('Live Camera')
-#custom_model_path = st.text_input('Custom YOLO model path', 'runs/detect/last_trained/train3/weights/best.pt')
-#pretrained_model_path = st.text_input('Pretrained YOLO model path', 'yolov8n.pt')
+uploaded_file = st.file_uploader('Upload an image', type=['jpg', 'jpeg', 'png'])
+if input_type == "Upload Image":
+    uploaded_file = st.file_uploader(
+        "Upload an image",
+        type=["jpg", "jpeg", "png", "webp"]
+    )
 
-if uploaded_file is not None:
-    image = Image.open(uploaded_file).convert("RGB")
-    tfile = tempfile.NamedTemporaryFile(delete=False, suffix='.jpg')
-    image.save(tfile.name)
-    tfile.write(uploaded_file.read())
-    image_path = tfile.name
+    if uploaded_file is not None:
+        try:
+            # Validate declared type first
+            if uploaded_file.type not in ["image/jpeg", "image/png", "image/webp"]:
+                st.warning("Unsupported file type.")
+                st.stop()
 
-    st.image(image, caption='Uploaded Image', use_container_width=True)
+            uploaded_file.seek(0)
+
+            try:
+                image = Image.open(uploaded_file)
+                image.load()
+                image = image.convert("RGB")
+            except Exception:
+                uploaded_file.seek(0)
+                file_bytes = np.frombuffer(uploaded_file.read(), dtype=np.uint8)
+                img_cv = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
+
+                if img_cv is None:
+                    st.warning("Invalid or corrupted image file.")
+                    st.stop()
+
+                img_rgb = cv2.cvtColor(img_cv, cv2.COLOR_BGR2RGB)
+                image = Image.fromarray(img_rgb)
+
+            tfile = tempfile.NamedTemporaryFile(delete=False, suffix=".jpg")
+            image.save(tfile.name)
+            image_path = tfile.name
+
+            st.image(image, caption="Uploaded Image", use_container_width=True)
+
+        except Exception as e:
+            st.error(f"Upload failed: {e}")
+            st.stop()
 
     # -------------------------------
     # ADD-ON: TEXT vs IMAGE DETECTION
