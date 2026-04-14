@@ -10,3 +10,7 @@ numpy==1.26.4
 gTTS==2.5.1
 deep-translator==1.11.4
 sentencepiece==0.2.0
+tokenizers==0.15.2
+huggingface-hub>=0.20.0
+safetensors>=0.4.0
+accelerate>=0.27.0
