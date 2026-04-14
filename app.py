@@ -36,8 +36,7 @@ CONF_THRESHOLD = 50
 language = st.selectbox('Select Language',['English','Tamil'])
 mode = st.selectbox('Mode Selection',['Scene Description','Silent Mode'])
 input_type = st.radio('Input Type',['Upload Image','Live Camera'])
-uploaded_file = st.file_uploader('Upload an image', type=['jpg', 'jpeg', 'png'])
-if input_type == 'Upload Image' else st.camera_input('Live Camera')
+uploaded_file = st.file_uploader('Upload an image', type=['jpg', 'jpeg', 'png'])if input_type == 'Upload Image' else st.camera_input('Live Camera')
 #custom_model_path = st.text_input('Custom YOLO model path', 'runs/detect/last_trained/train3/weights/best.pt')
 #pretrained_model_path = st.text_input('Pretrained YOLO model path', 'yolov8n.pt')
 
