@@ -1,5 +1,2 @@
 tesseract-ocr
-tesseract-ocr-eng
-tesseract-ocr-tam
-libgl1
-libglib2.0-0
+
