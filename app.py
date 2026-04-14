@@ -25,7 +25,7 @@ h1,h2,h3,label,p,div{color:white !important;}
 .stSelectbox div[data-baseweb="select"]>div,.stTextInput input,.stFileUploader{background:#232634;border-radius:10px;}
 .stButton>button{border-radius:10px;}
 </style>''', unsafe_allow_html=True)
-st.title('AI Assistant for Visually Impaired')
+st.title('🤖 AI Assistant for Visually Impaired Users👨‍🦯')
 
 # -------------------------------
 # TESSERACT CONFIG
@@ -38,9 +38,9 @@ else:
 CONF_THRESHOLD = 50 
 
 
-language = st.selectbox('Select Language', ['English', 'Tamil'])
-mode = st.selectbox('Mode Selection', ['Scene Description', 'Silent Mode'])
-input_type = st.radio('Input Type', ['Upload Image', 'Live Camera'])
+language = st.selectbox('📝 Select Language', ['English', 'Tamil'])
+mode = st.selectbox('🤏 Mode Selection', ['Scene Description', 'Silent Mode'])
+input_type = st.radio('📸 Input Type', ['Upload Image', 'Live Camera'])
 
 image = None
 image_path = None
