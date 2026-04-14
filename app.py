@@ -1,23 +1,12 @@
 import streamlit as st
-import os
-
-try:
-    import cv2
-except ImportError:
-    os.system('pip uninstall -y opencv-python opencv-python-headless')
-    os.system('pip install opencv-python-headless')
-    import cv2
-
-from ultralytics import YOLO
 import cv2
-import matplotlib.pyplot as plt
+from ultralytics import YOLO
 from transformers import BlipProcessor, BlipForConditionalGeneration
 from PIL import Image, UnidentifiedImageError
 import pytesseract
 import re
 import numpy as np
 import tempfile
-import os
 from gtts import gTTS
 from io import BytesIO
 from deep_translator import GoogleTranslator
