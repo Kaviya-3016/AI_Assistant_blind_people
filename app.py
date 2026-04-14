@@ -14,6 +14,7 @@ from io import BytesIO
 from deep_translator import GoogleTranslator
 import platform
 import shutil
+import io
 
 # ================================
 # STREAMLIT UI
