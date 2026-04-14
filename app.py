@@ -165,11 +165,16 @@ if image is not None:
     # ============== YOLO + BLIP PIPELINE (UNCHANGED) =============
     # ============================================================
     if not IS_TEXT_IMAGE:
-        custom_model = YOLO("best.pt")
-        #custom_model = YOLO(r"D:/Final_Year_Project/trained_model/runs/detect/train3/weights/best.pt")
-        #D:\Final_Year_Project\trained_model\runs\detect\train3\weights\best.pt
-        #D:\Final_Year_Project\best.pt
-        pretrained_model = YOLO("yolov8n.pt")
+        @st.cache_resource
+        def load_custom_model():
+            return YOLO("best.pt")
+
+        @st.cache_resource
+        def load_pretrained_model():
+            return YOLO("yolov8n.pt")
+
+        custom_model = load_custom_model()
+        pretrained_model = load_pretrained_model()
 
         custom_results = custom_model(image, conf=0.25)
         pretrained_results = pretrained_model(image, conf=0.25)
@@ -208,8 +213,13 @@ if image is not None:
         img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         st.image(img_rgb, caption='YOLO Detection + BLIP Ready Image', use_container_width=True)
 
-        processor = BlipProcessor.from_pretrained('Salesforce/blip-image-captioning-base')
-        blip_model = BlipForConditionalGeneration.from_pretrained('Salesforce/blip-image-captioning-base')
+        @st.cache_resource
+        def load_blip():
+            proc = BlipProcessor.from_pretrained('Salesforce/blip-image-captioning-base')
+            mdl = BlipForConditionalGeneration.from_pretrained('Salesforce/blip-image-captioning-base')
+            return proc, mdl
+
+        processor, blip_model = load_blip()
 
         pil_image = Image.fromarray(img_rgb)
         inputs = processor(pil_image, return_tensors='pt')
