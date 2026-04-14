@@ -1,6 +1,6 @@
+opencv-python-headless==4.8.0.74
 streamlit
 ultralytics
-opencv-python-headless
 matplotlib
 transformers
 torch
