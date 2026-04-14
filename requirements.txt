@@ -1,4 +1,4 @@
-opencv-python-headless==4.8.0.74
+opencv-python-headless
 streamlit
 ultralytics
 matplotlib
@@ -10,6 +10,3 @@ numpy
 gTTS
 deep-translator
 sentencepiece
-
-
-
