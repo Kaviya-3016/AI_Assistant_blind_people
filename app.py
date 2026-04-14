@@ -3,7 +3,7 @@ from ultralytics import YOLO
 import cv2
 import matplotlib.pyplot as plt
 from transformers import BlipProcessor, BlipForConditionalGeneration
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 import pytesseract
 import re
 import numpy as np
@@ -12,11 +12,13 @@ import os
 from gtts import gTTS
 from io import BytesIO
 from deep_translator import GoogleTranslator
+import platform
+import shutil
 
 # ================================
 # STREAMLIT UI
 # ================================
-st.set_page_config(page_title='AI Assistant for Visually Impaired',page_icon='icon.png', layout='wide')
+st.set_page_config(page_title='VisionAid AI',page_icon='ai.png', layout='wide')
 st.markdown('''<style>
 .stApp{background:linear-gradient(180deg,#050b18,#02060f);color:white;}
 .block-container{max-width:760px;padding-top:2rem;}
@@ -29,26 +31,68 @@ st.title('AI Assistant for Visually Impaired')
 # -------------------------------
 # TESSERACT CONFIG
 # -------------------------------
-pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+
+if platform.system() == "Windows":
+    pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+else:
+    pytesseract.pytesseract.tesseract_cmd = shutil.which("tesseract")
 CONF_THRESHOLD = 50 
 
 
-language = st.selectbox('Select Language',['English','Tamil'])
-mode = st.selectbox('Mode Selection',['Scene Description','Silent Mode'])
-input_type = st.radio('Input Type',['Upload Image','Live Camera'])
-uploaded_file = st.file_uploader('Upload an image', type=['jpg', 'jpeg', 'png'])if input_type == 'Upload Image' else st.camera_input('Live Camera')
-#custom_model_path = st.text_input('Custom YOLO model path', 'runs/detect/last_trained/train3/weights/best.pt')
-#pretrained_model_path = st.text_input('Pretrained YOLO model path', 'yolov8n.pt')
+language = st.selectbox('Select Language', ['English', 'Tamil'])
+mode = st.selectbox('Mode Selection', ['Scene Description', 'Silent Mode'])
+input_type = st.radio('Input Type', ['Upload Image', 'Live Camera'])
 
-if uploaded_file is not None:
-    image = Image.open(uploaded_file).convert("RGB")
-    tfile = tempfile.NamedTemporaryFile(delete=False, suffix='.jpg')
-    image.save(tfile.name)
-    tfile.write(uploaded_file.read())
-    image_path = tfile.name
+image = None
+image_path = None
 
-    st.image(image, caption='Uploaded Image', use_container_width=True)
+# -------------------------------
+# INPUT HANDLING
+# -------------------------------
+if input_type == 'Upload Image':
+    uploaded_file = st.file_uploader(
+        'Upload an image',
+        type=['jpg', 'jpeg', 'png', 'webp']
+    )
 
+    if uploaded_file is not None:
+        try:
+            uploaded_file.seek(0)
+            image = Image.open(uploaded_file).convert("RGB")
+
+            tfile = tempfile.NamedTemporaryFile(delete=False, suffix=".jpg")
+            image.save(tfile.name)
+            image_path = tfile.name
+
+            st.image(image, caption='Uploaded Image', use_container_width=True)
+
+        except UnidentifiedImageError:
+            st.error("Invalid image file. Please upload JPG, PNG, or WEBP.")
+
+        except Exception as e:
+            st.error(f"Error loading image: {e}")
+
+else:
+    camera_file = st.camera_input("Take a photo")
+
+    if camera_file is not None:
+        try:
+            camera_file.seek(0)
+            image = Image.open(camera_file).convert("RGB")
+
+            tfile = tempfile.NamedTemporaryFile(delete=False, suffix=".jpg")
+            image.save(tfile.name)
+            image_path = tfile.name
+
+            st.image(image, caption='Captured Image', use_container_width=True)
+
+        except Exception as e:
+            st.error(f"Could not read camera image: {e}")
+
+# -------------------------------
+# PROCESS ONLY IF IMAGE EXISTS
+# -------------------------------
+if image is not None:
     # -------------------------------
     # ADD-ON: TEXT vs IMAGE DETECTION
     # -------------------------------
@@ -121,6 +165,9 @@ if uploaded_file is not None:
     # ============================================================
     if not IS_TEXT_IMAGE:
         custom_model = YOLO("best.pt")
+        #custom_model = YOLO(r"D:/Final_Year_Project/trained_model/runs/detect/train3/weights/best.pt")
+        #D:\Final_Year_Project\trained_model\runs\detect\train3\weights\best.pt
+        #D:\Final_Year_Project\best.pt
         pretrained_model = YOLO("yolov8n.pt")
 
         custom_results = custom_model(image, conf=0.25)
@@ -251,4 +298,4 @@ if uploaded_file is not None:
 
 
     pass
-#python -m streamlit run "D:\OneDrive - ELCOT\main.py"
+#python -m streamlit run app.py
