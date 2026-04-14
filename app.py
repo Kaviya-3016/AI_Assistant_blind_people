@@ -111,7 +111,7 @@ if image is not None:
         st.subheader('OCR OUTPUT')
         data = pytesseract.image_to_data(
             image,
-            lang='eng+tam+equ',
+            lang='eng+tam',
             output_type=pytesseract.Output.DICT
         )
 
