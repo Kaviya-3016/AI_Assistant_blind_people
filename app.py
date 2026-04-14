@@ -1,24 +1,22 @@
 import streamlit as st
 from ultralytics import YOLO
 import cv2
-import numpy as np
-from transformers import AutoProcessor, BlipForConditionalGeneration
-from PIL import Image, UnidentifiedImageError, ImageFile
+import matplotlib.pyplot as plt
+from transformers import BlipProcessor, BlipForConditionalGeneration
+from PIL import Image
 import pytesseract
 import re
-
+import numpy as np
 import tempfile
 import os
 from gtts import gTTS
 from io import BytesIO
 from deep_translator import GoogleTranslator
-import platform
-import shutil
 
 # ================================
 # STREAMLIT UI
 # ================================
-st.set_page_config(page_title='VisionAid AI',page_icon='icon.png', layout='wide')
+st.set_page_config(page_title='AI Assistant for Visually Impaired',page_icon='icon.png', layout='wide')
 st.markdown('''<style>
 .stApp{background:linear-gradient(180deg,#050b18,#02060f);color:white;}
 .block-container{max-width:760px;padding-top:2rem;}
@@ -31,59 +29,26 @@ st.title('AI Assistant for Visually Impaired')
 # -------------------------------
 # TESSERACT CONFIG
 # -------------------------------
-
-if platform.system() == "Windows":
-    pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
-else:
-    pytesseract.pytesseract.tesseract_cmd = shutil.which("tesseract")
+pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 CONF_THRESHOLD = 50 
-
 
 
 language = st.selectbox('Select Language',['English','Tamil'])
 mode = st.selectbox('Mode Selection',['Scene Description','Silent Mode'])
 input_type = st.radio('Input Type',['Upload Image','Live Camera'])
-#uploaded_file = st.file_uploader('Upload an image', type=['jpg', 'jpeg', 'png'])
-if input_type == "Upload Image":
-    uploaded_file = st.file_uploader(
-        "Upload an image",
-        type=["jpg", "jpeg", "png", "webp"]
-    )
+uploaded_file = st.file_uploader('Upload an image', type=['jpg', 'jpeg', 'png'])
+if input_type == 'Upload Image' else st.camera_input('Live Camera')
+#custom_model_path = st.text_input('Custom YOLO model path', 'runs/detect/last_trained/train3/weights/best.pt')
+#pretrained_model_path = st.text_input('Pretrained YOLO model path', 'yolov8n.pt')
 
-    if uploaded_file is not None:
-        try:
-            # Validate declared type first
-            if uploaded_file.type not in ["image/jpeg", "image/png", "image/webp"]:
-                st.warning("Unsupported file type.")
-                st.stop()
+if uploaded_file is not None:
+    image = Image.open(uploaded_file).convert("RGB")
+    tfile = tempfile.NamedTemporaryFile(delete=False, suffix='.jpg')
+    image.save(tfile.name)
+    tfile.write(uploaded_file.read())
+    image_path = tfile.name
 
-            uploaded_file.seek(0)
-
-            try:
-                image = Image.open(uploaded_file)
-                image.load()
-                image = image.convert("RGB")
-            except Exception:
-                uploaded_file.seek(0)
-                file_bytes = np.frombuffer(uploaded_file.read(), dtype=np.uint8)
-                img_cv = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
-
-                if img_cv is None:
-                    st.warning("Invalid or corrupted image file.")
-                    st.stop()
-
-                img_rgb = cv2.cvtColor(img_cv, cv2.COLOR_BGR2RGB)
-                image = Image.fromarray(img_rgb)
-
-            tfile = tempfile.NamedTemporaryFile(delete=False, suffix=".jpg")
-            image.save(tfile.name)
-            image_path = tfile.name
-
-            st.image(image, caption="Uploaded Image", use_container_width=True)
-
-        except Exception as e:
-            st.error(f"Upload failed: {e}")
-            st.stop()
+    st.image(image, caption='Uploaded Image', use_container_width=True)
 
     # -------------------------------
     # ADD-ON: TEXT vs IMAGE DETECTION
@@ -157,9 +122,6 @@ if input_type == "Upload Image":
     # ============================================================
     if not IS_TEXT_IMAGE:
         custom_model = YOLO("best.pt")
-        #custom_model = YOLO(r"D:/Final_Year_Project/trained_model/runs/detect/train3/weights/best.pt")
-        #D:\Final_Year_Project\trained_model\runs\detect\train3\weights\best.pt
-        #D:\Final_Year_Project\best.pt
         pretrained_model = YOLO("yolov8n.pt")
 
         custom_results = custom_model(image, conf=0.25)
@@ -199,7 +161,7 @@ if input_type == "Upload Image":
         img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         st.image(img_rgb, caption='YOLO Detection + BLIP Ready Image', use_container_width=True)
 
-        processor = AutoProcessor.from_pretrained('Salesforce/blip-image-captioning-base')
+        processor = BlipProcessor.from_pretrained('Salesforce/blip-image-captioning-base')
         blip_model = BlipForConditionalGeneration.from_pretrained('Salesforce/blip-image-captioning-base')
 
         pil_image = Image.fromarray(img_rgb)
@@ -290,4 +252,4 @@ if input_type == "Upload Image":
 
 
     pass
-#python -m streamlit run app.py
+#python -m streamlit run "D:\OneDrive - ELCOT\main.py"
