@@ -1,4 +1,13 @@
 import streamlit as st
+import os
+
+try:
+    import cv2
+except ImportError:
+    os.system('pip uninstall -y opencv-python opencv-python-headless')
+    os.system('pip install opencv-python-headless')
+    import cv2
+
 from ultralytics import YOLO
 import cv2
 import matplotlib.pyplot as plt
