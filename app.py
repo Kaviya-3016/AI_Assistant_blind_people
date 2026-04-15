@@ -1,5 +1,5 @@
 import streamlit as st
-import cv2
+from PIL import ImageDraw, ImageFont
 from ultralytics import YOLO
 from transformers import BlipProcessor, BlipForConditionalGeneration
 from PIL import Image, UnidentifiedImageError
@@ -199,17 +199,22 @@ if image is not None:
         scene_prompt = 'a scene containing: ' + ', '.join(detected_objects)
         st.write('Scene Prompt:', scene_prompt)
 
-        img = cv2.imread(image_path)
+        draw_image = image.copy()
+        draw = ImageDraw.Draw(draw_image)
         for det in all_detections:
             x1, y1, x2, y2, conf, label = det
             x1, y1, x2, y2 = map(int, [x1, y1, x2, y2])
-            cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
-            (w, h), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
-            cv2.rectangle(img, (x1, y1 - h - 10), (x1 + w, y1), (0, 255, 0), -1)
-            cv2.putText(img, label, (x1, y1 - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
+            draw.rectangle([x1, y1, x2, y2], outline=(0, 255, 0), width=2)
+            try:
+                font = ImageFont.truetype("arial.ttf", 14)
+            except:
+                font = ImageFont.load_default()
+            bbox = draw.textbbox((x1, y1), label, font=font)
+            draw.rectangle([bbox[0], bbox[1] - 2, bbox[2], bbox[3] + 2], fill=(0, 255, 0))
+            draw.text((x1, y1 - 2), label, fill=(0, 0, 0), font=font)
 
-        img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        st.image(img_rgb, caption='YOLO Detection + BLIP Ready Image', use_container_width=True)
+        img_rgb = np.array(draw_image)
+        st.image(draw_image, caption='YOLO Detection + BLIP Ready Image', use_container_width=True)
 
         @st.cache_resource
         def load_blip():
@@ -246,11 +251,9 @@ if image is not None:
         for det in all_detections:
             x1, y1, x2, y2, conf, label = det
             x1, y1, x2, y2 = map(int, [x1, y1, x2, y2])
-            crop = img[y1:y2, x1:x2]
-            if crop.size == 0:
+            pil_crop = draw_image.crop((x1, y1, x2, y2))
+            if pil_crop.size[0] == 0 or pil_crop.size[1] == 0:
                 continue
-            crop_rgb = cv2.cvtColor(crop, cv2.COLOR_BGR2RGB)
-            pil_crop = Image.fromarray(crop_rgb)
             inputs = processor(pil_crop, return_tensors='pt')
             out = blip_model.generate(**inputs, max_length=30)
             obj_caption = processor.decode(out[0], skip_special_tokens=True)
